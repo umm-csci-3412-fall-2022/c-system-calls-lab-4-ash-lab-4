@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <stdbool.h>
@@ -5,6 +6,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <string.h>
+#include <limits.h>
 
 static int num_dirs, num_regular;
 
@@ -21,6 +23,15 @@ bool is_dir(const char* path) {
      * you'll have a substantial memory leak (think of how many times this
      * will be called!).
      */
+    struct stat buffer;
+
+    if (stat(path, &buffer) < 0) {
+      perror("");
+      fprintf(stderr, "unable to stat path '%s', aborting...\n", path);
+      exit(1);
+    }
+
+    return S_ISDIR(buffer.st_mode);
 }
 
 /*
@@ -41,6 +52,64 @@ void process_directory(const char* path) {
      * with a matching call to chdir() to move back out of it when you're
      * done.
      */
+
+    num_dirs++;
+
+    // Open the directory
+    DIR* directory = opendir(path);
+    if (directory == NULL) {
+      perror("");
+      fprintf(stderr, "unable to open directory '%s', aborting...\n", path);
+      exit(1);
+    }
+
+    // Get the current working directory
+    char cwd[PATH_MAX];
+    if (getcwd(cwd, PATH_MAX) == NULL) {
+      perror("");
+      fprintf(stderr, "unable to get current working directory, aborting...\n");
+      exit(1);
+    }
+
+    // Switch into the directory
+    if (chdir(path) < 0) {
+      perror("");
+      fprintf(stderr, "unable to get change into directory, aborting...\n");
+      exit(1);
+    }
+
+    // Get all of the children of this directory
+    while (true) {
+        struct dirent* entry = readdir(directory);
+
+        if (entry == NULL) {
+            break;
+        }
+       
+
+        // printf("'%s'\n", entry->d_name);
+
+        if (entry->d_name[0] == '.') {
+            continue;
+        }
+
+        process_path(entry->d_name);
+    }
+
+    if (errno != 0) {
+        perror("");
+        fprintf(stderr, "unable to read from directory '%s', aborting...\n", path);
+        exit(1);
+    }
+
+    if (closedir(directory) < 0) {
+        perror("");
+        fprintf(stderr, "unable to close directory '%s', aborting...\n", path);
+        exit(1);
+    }
+
+    // Change the working directory back
+    chdir(cwd);
 }
 
 void process_file(const char* path) {
@@ -48,6 +117,7 @@ void process_file(const char* path) {
      * Update the number of regular files.
      * This is as simple as it seems. :-)
      */
+    num_regular++;
 }
 
 void process_path(const char* path) {

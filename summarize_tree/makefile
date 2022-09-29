@@ -1,8 +1,9 @@
 summarize_tree: summarize_tree.c
-	gcc -Wall -Wpedantic -g -o file_disemvowel main.c
+	gcc -Wall -Wpedantic -g -o summarize_tree summarize_tree.c
 
-file_disemvowel_fast: mainFast.c
-	gcc -Wall -Wpedantic -g -o file_disemvowel_fast main.c
+summarize_tree_ftw: summarize_tree_ftw.c
+	gcc -Wall -Wpedantic -g -o summarize_tree_ftw summarize_tree_ftw.c
 
 clean:
-	rm file_disemvowel
+	rm summarize_tree
+	rm summarize_tree_ftw

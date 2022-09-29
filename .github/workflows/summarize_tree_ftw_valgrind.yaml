@@ -1,0 +1,37 @@
+# This is a basic workflow to help you get started with Actions
+
+name: summarize-tree-ftw-valgrind
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on: [push, pull_request]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job
+  summarize-tree-ftw-valgrind:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Setup BATS testing framework
+      uses: mig4/setup-bats@v1.2.0
+    - name: Install valgrind
+      run: sudo apt-get install -y valgrind
+    - name: Check out the code
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Expand the tar file
+      run: tar -zxf test_data.tgz
+      working-directory: ./summarize_tree/test_data
+    - name: Compile summarize_tree_ftw
+      # This assumes that compiling `summarize_tree_ftw.c` is sufficient.
+      # If that's not true (i.e., you have helper files) then you'll
+      # need to modify this accordingly.
+      run: gcc -Wall -o summarize_tree_ftw summarize_tree_ftw.c
+      working-directory: ./summarize_tree
+    - name: Run a valgrind test
+      run: valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./summarize_tree_ftw test_data/loads_o_files
+      working-directory: ./summarize_tree

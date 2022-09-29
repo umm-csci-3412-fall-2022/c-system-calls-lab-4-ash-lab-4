@@ -29,6 +29,9 @@ int main(int argc, char** argv) {
 
     disemvowel(inputFile, outputFile);
 
+    fclose(inputFile);
+    fclose(outputFile);
+
     return 0;
 }
 

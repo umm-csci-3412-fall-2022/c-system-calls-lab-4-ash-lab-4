@@ -31,16 +31,19 @@ int main(int argc, char** argv) {
 
     disemvowel(inputFile, outputFile);
 
+    fclose(inputFile);
+    fclose(outputFile);
+
     return 0;
 }
 
 
 void disemvowel(FILE* input, FILE* output) {
-    int read;
+    int read = 0;
     char buf[BUF_SIZE];
     // Iterate over each character of the input string
     do {
-        char in;
+        char in = 0;
         read = fread(&in, 1, BUF_SIZE, input);
 
         unsigned int write_ptr = 0;

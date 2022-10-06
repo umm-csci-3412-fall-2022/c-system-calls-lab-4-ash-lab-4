@@ -44,7 +44,7 @@ void disemvowel(FILE* input, FILE* output) {
     // Iterate over each character of the input string
     do {
         char in = 0;
-        read = fread(&in, 1, BUF_SIZE, input);
+        read = fread(&buf, 1, BUF_SIZE, input);
 
         unsigned int write_ptr = 0;
         for (int i = 0; i < read; i++) {
